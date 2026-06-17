@@ -37,6 +37,7 @@ A full exploit example is available in `pwn-script.sh`. This script uses the pro
 ```bash
 sudo echo BASE64STRING=
 ```
+A full interactive walkthrough is available in `WALKTHROUGH.md`.
 
 ## Prompt Injection Benchmarks
 

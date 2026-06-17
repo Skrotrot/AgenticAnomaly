@@ -4,8 +4,6 @@ set -u
 
 HALT_MESSAGE='Halting request, pending soc investigation'
 
-rm /var/home/qah/.ssh/known_hosts
-
 ssh -o "StrictHostKeyChecking no" ctfuser@localhost 'sudo /usr/local/sbin/show-log ../../root/client.key' > client.key
 ssh -o "StrictHostKeyChecking no" ctfuser@localhost 'sudo /usr/local/sbin/show-log ../../root/client.crt' > client.crt
 
