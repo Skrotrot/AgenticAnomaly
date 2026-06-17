@@ -1,0 +1,8 @@
+#!/bin/bash
+# /usr/local/sbin/show-log
+
+set -u
+
+LOG="$1"
+
+/usr/bin/sed -n '1,200p' -- "/var/log/$LOG"

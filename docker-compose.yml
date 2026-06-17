@@ -1,0 +1,68 @@
+services:
+  pki:
+    build: ./pki/
+    volumes:
+      - client-creds:/run/mtls/client
+      - server-creds:/run/mtls/server
+
+  mtls-website:
+    build: ./mtls-website/
+    ports:
+      - 8443:8443
+    volumes:
+      - server-creds:/run/mtls
+    networks:
+      - soc
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8444/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      pki:
+        condition: service_completed_successfully
+
+  soc:
+    build: ./soc/
+    environment:
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+    networks:
+      - internal
+      - soc
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      mtls-website:
+        condition: service_healthy
+
+  jump-server:
+    build: ./jump-server/
+    privileged: true
+    cgroup: host
+    stop_signal: SIGRTMIN+3
+    tmpfs:
+      - /run
+      - /tmp
+    ports:
+      - 22:22
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - client-creds:/root
+    networks:
+      - internal
+    depends_on:
+      pki:
+        condition: service_completed_successfully
+      soc:
+        condition: service_healthy
+
+networks:
+  internal: {}
+  soc: {}
+
+volumes:
+  client-creds: {}
+  server-creds: {}

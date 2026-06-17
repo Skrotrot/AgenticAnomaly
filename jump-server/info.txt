@@ -1,0 +1,6 @@
+To whom it may concern...
+
+To access the website talk with John in security to get the password for the root account. The keys are in.
+
+/root/client.key
+/root/client.crt
