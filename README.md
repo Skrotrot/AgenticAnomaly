@@ -4,8 +4,6 @@ AgenticAnomaly is an **indirect prompt injection CTF** for testing how **agentic
 
 The lab was developed as part of the **EP284U** course at the **KTH Royal Institute of Technology**.
 
-**Topics:** indirect prompt injection, prompt injection CTF, agentic SOC, LLM security, AI security, security operations, cyber range, OpenRouter, Docker Compose.
-
 ## Agentic SOC CTF Setup
 
 To get started and try out the CTF, start by cloning the repo.
