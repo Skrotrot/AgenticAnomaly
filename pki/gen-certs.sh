@@ -2,11 +2,11 @@
 
 set -euo pipefail
 
-openssl req -x509 -newkey ed25519 -days 3650 \
+openssl req -x509 -newkey rsa:2048 -sha256 -days 3650 \
   -noenc -keyout server.key -out server.crt -subj "/CN=mtls-website" \
   -addext "subjectAltName=DNS:mtls-website"
 
-openssl req -x509 -newkey ed25519 -days 3650 \
+openssl req -x509 -newkey rsa:2048 -sha256 -days 3650 \
   -noenc -keyout client.key -out client.crt -subj "/CN=jump-server"
 
 mkdir -p /run/mtls/server
