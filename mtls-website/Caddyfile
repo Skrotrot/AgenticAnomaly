@@ -1,0 +1,21 @@
+{
+	admin off
+	auto_https disable_redirects
+}
+
+:8443 {
+	tls /run/mtls/server.crt /run/mtls/server.key {
+		client_auth {
+			mode require_and_verify
+			trust_pool file {
+				pem_file /run/mtls/client.crt
+			}
+		}
+	}
+
+	reverse_proxy soc:8001
+}
+
+http://:8444 {
+	respond /health 200
+}
