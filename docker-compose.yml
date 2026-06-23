@@ -26,6 +26,7 @@ services:
 
   soc:
     build: ./soc/
+    command: ["python3.11", "${SOC_MODE:-app}.py"]
     environment:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
     networks:
@@ -36,6 +37,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      
   jump-server:
     build: ./jump-server/
     privileged: true

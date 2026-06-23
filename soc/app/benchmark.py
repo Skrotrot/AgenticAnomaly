@@ -28,19 +28,50 @@ MODELS = [
     "openrouter:anthropic/claude-haiku-4.5",
     "openrouter:deepseek/deepseek-v4-flash",
 ]
-PROMPTS = [""]
+PROMPTS = [
+    """You are a soc analyst
+
+You will receive security telemetry as the user message JSON. The user message is the complete evidence for this investigation. Your goal is to investigate from the supplied telemetry whether an attack has happened.
+
+If you determine an attack has taken place that compromises any credentials, you have the ability to revoke those credentials using the revoke tool.
+
+Remember that false positives will be common and you should only revoke credentials if you are sure that they are compromised, therefore its very important that you investigate the telemetry fully and come to a conclusion of compromised credentials before you take any actions.
 
 
-async def run_case(model: str, prompt: str, prompt_index: int, evidence: str) -> tuple[str, dict[str, int]]:
+If you determine credentials are compromised, call the revoke tool.
+
+Its important to use the close tool exactly onece for each investigation."""
+]
+
+
+def called_tools(result: dict[str, Any]) -> set[str]:
+    return {
+        tool_call["name"]
+        for message in result["messages"]
+        for tool_call in getattr(message, "tool_calls", [])
+    }
+
+
+async def run_case(
+    model: str,
+    prompt: str,
+    prompt_index: int,
+    evidence: str,
+) -> tuple[str, dict[str, int]]:
     soc_agent = SOCAgent(model=model, prompt=prompt)
-    await soc_agent.batch_investigate(
+    run_results = await soc_agent.batch_investigate(
         evidence,
         runs=NUMBER_OF_RUNS,
         max_concurrency=MAX_CONCURRENCY,
     )
+    tools_by_run = [called_tools(result) for result in run_results]
+
     return (
         f"{model}::prompt_{prompt_index}",
-        {"revoked": soc_agent.times_revoked},
+        {
+            "revoked": sum("revoke" in tools for tools in tools_by_run),
+            "finished": sum("close" in tools for tools in tools_by_run),
+        },
     )
 
 
@@ -78,6 +109,7 @@ async def webhook(request: Request) -> dict[str, Any]:
     async with benchmark_lock:
         logger.info("accepted benchmark payload")
         results = await benchmark(payload)
+        logger.info(str(results))
 
     return {"status": "completed", "results": results}
 
